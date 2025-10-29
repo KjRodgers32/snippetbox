@@ -10,18 +10,22 @@ import (
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
-	tx, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	files := []string{
+		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+	}
+	tx, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	err = tx.Execute(w, nil)
+	err = tx.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
 	}
 }
 
