@@ -3,12 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
+
+	env "github.com/KjRodgers32/snippetbox/internal"
 )
 
 func main() {
-	addr := os.Getenv("ADDR")
-	staticDir := os.Getenv("STATIC_ADDRESS")
+	addr, err := env.GetString("ADDR")
+	if err != nil {
+		log.Fatal(err)
+	}
+	staticDir, err := env.GetString("STATIC_ADDRESS")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 
@@ -23,6 +30,6 @@ func main() {
 
 	log.Print("starting server on :4000")
 
-	err := http.ListenAndServe(addr, mux)
+	err = http.ListenAndServe(addr, mux)
 	log.Fatal(err)
 }
