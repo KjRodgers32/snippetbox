@@ -3,12 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
+	addr := os.Getenv("ADDR")
+	staticDir := os.Getenv("STATIC_ADDRESS")
+
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	fileServer := http.FileServer(http.Dir(staticDir))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("GET /{$}", home)
@@ -19,6 +23,6 @@ func main() {
 
 	log.Print("starting server on :4000")
 
-	err := http.ListenAndServe(":4000", mux)
+	err := http.ListenAndServe(addr, mux)
 	log.Fatal(err)
 }
