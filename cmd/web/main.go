@@ -2,19 +2,23 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	env "github.com/KjRodgers32/snippetbox/internal"
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	addr, err := env.GetString("ADDR")
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("error getting port address")
 	}
 	staticDir, err := env.GetString("STATIC_ADDRESS")
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("error getting static address")
 	}
 
 	mux := http.NewServeMux()
@@ -28,7 +32,7 @@ func main() {
 
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 
-	log.Print("starting server on :4000")
+	logger.Info("starting server on", addr)
 
 	err = http.ListenAndServe(addr, mux)
 	log.Fatal(err)
