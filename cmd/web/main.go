@@ -8,6 +8,10 @@ import (
 	env "github.com/KjRodgers32/snippetbox/internal"
 )
 
+type application struct {
+	logger *slog.Logger
+}
+
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -20,18 +24,22 @@ func main() {
 		logger.Error("error getting static address")
 	}
 
+	app := &application{
+		logger: logger,
+	}
+
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir(staticDir))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
+	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
 
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
-	logger.Info("starting server on", addr)
+	logger.Info("starting server on", "addr", addr)
 
 	err = http.ListenAndServe(addr, mux)
 	logger.Error(err.Error())
