@@ -4,8 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"database/sql"
 
 	env "github.com/KjRodgers32/snippetbox/internal"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type config struct {
@@ -16,6 +18,20 @@ type config struct {
 type application struct {
 	logger *slog.Logger
 	config config
+}
+
+func OpenDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
 }
 
 func main() {
@@ -29,6 +45,17 @@ func main() {
 	if err != nil {
 		logger.Error("error getting static address")
 	}
+	dsn, err := env.GetString("DSN")
+	if err != nil {
+		logger.Error("error getting dsn")
+	}
+
+	db, err := OpenDB(dsn)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	
+	defer db.Close()
 
 	config := config{
 		addr:      addr,
