@@ -1,9 +1,12 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"runtime/debug"
+)
 
 func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
-	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+	app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI(), "trace", string(debug.Stack()))
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
