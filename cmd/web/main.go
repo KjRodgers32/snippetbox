@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"log/slog"
 	"net/http"
 	"os"
-	"database/sql"
+
+	"github.com/KjRodgers32/snippetbox/internal/models"
 
 	env "github.com/KjRodgers32/snippetbox/internal"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -16,8 +19,9 @@ type config struct {
 }
 
 type application struct {
-	logger *slog.Logger
-	config config
+	logger   *slog.Logger
+	config   config
+	snippets *models.SnippetModel
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {
@@ -54,7 +58,7 @@ func main() {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	
+
 	defer db.Close()
 
 	config := config{
@@ -63,8 +67,9 @@ func main() {
 	}
 
 	app := &application{
-		logger: logger,
-		config: config,
+		logger:   logger,
+		config:   config,
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	logger.Info("starting server on", "addr", app.config.addr)
