@@ -19,7 +19,13 @@ type SnippetModel struct {
 }
 
 func (sm *SnippetModel) Insert(title, content string, expires int) (int, error) {
-	result, err := sm.DB.Exec(insertQuery, title, content, expires)
+	tx, err := sm.DB.Begin()
+	if err != nil {
+		return 0, nil
+	}
+	defer tx.Rollback()
+
+	result, err := tx.Exec(insertQuery, title, content, expires)
 	if err != nil {
 		return 0, nil
 	}
